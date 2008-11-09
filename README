@@ -1,0 +1,6 @@
+A simple rails plugin that adds a new rake task [rake db:schema:to_yaml] that will analyze your database and create a model.yml file for use in ruboss scaffolding.
+
+TODO:
+
+Analyze relationships and create appropriate associations. [BelongsTo], [HasMany]
+Potentially adding some new yaml shortcut methods for [HasManyThrough], [Polymorphic], [STI]
