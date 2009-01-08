@@ -2,11 +2,18 @@ package <%= base_package %>.models {
 <% if has_manies.length > 0 -%>
   import org.ruboss.collections.ModelsCollection;
 <% end -%>
+<% if tree_model.size > 0 -%>
+  <% @tree_or_no_tree = 'RubossTreeModel' %>
+  import org.ruboss.models.RubossTreeModel
+<% end -%>
+<% unless tree_model.size > 0 -%>
+  <% @tree_or_no_tree = 'RubossModel' %>
   import org.ruboss.models.RubossModel;
+<% end -%>
   
   [Resource(name="<%= resource_controller_name %>")]
   [Bindable]
-  public class <%= class_name %> extends RubossModel {
+  public class <%= class_name %> extends <%= @tree_or_no_tree %> {
 <% if attributes && !attributes.empty? && attributes[0].flex_type != "Boolean" -%>
     public static const LABEL:String = "<%= attributes[0].flex_name %>";
 <% else -%>
@@ -23,6 +30,24 @@ package <%= base_package %>.models {
 <% for model in belongs_tos -%>
     [BelongsTo]
     public var <%= model.camelcase(:lower) %>:<%= model.camelcase %>;
+
+<% end -%>
+<% if tree_model.size > 0 -%>
+    [BelongsTo]
+    public var <%= tree_model[0].camelcase(:lower) %>:<%= class_name %>;
+
+<% end -%>
+<% for model in polymorphic -%>
+    [BelongsTo(polymorphic="true", dependsOn="Model1, Model2")]
+    public var <%= model.camelcase(:lower) %>:Object;
+      
+<% end -%>
+<% if has_many_through.size > 0 -%>
+    [HasMany]
+    public var <%= has_many_through[0].camelcase(:lower) %>:ModelsCollection;
+    
+    [HasMany(through="<%= has_many_through[0].camelcase %>")]
+    public var <%= has_many_through[1].camelcase(:lower) %>:ModelsCollection;
 
 <% end -%>
 <% for model in has_ones -%>

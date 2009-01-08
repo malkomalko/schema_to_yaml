@@ -5,6 +5,17 @@ module Enumerable
 end
 
 module SchemaToYaml
+  
+  ##################################################################
+  # Special columns:
+  #   - attachment_field, belongs_to, has_many, has_many_through,
+  #   - has_one, polymorphic, tree_model
+  # Examples:
+  #   - has_many_through: [living_situations, buildings]
+  #   - attachment_field: [avatar]
+  #   - tree_model: [parent]
+  #   - polymorphic: [favoriteable]
+  ##################################################################
 
   def self.schema_to_yaml
     table_arr = ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations).map
@@ -15,7 +26,6 @@ module SchemaToYaml
     ####################################################################################
     disregarded_columns = %w(id created_at updated_at)
     @array_of_has_manies = []
-    @array_of_polymorphics = []
     
     table_arr.each do |table|
       column_arr = ActiveRecord::Base.connection.columns(table)
@@ -42,6 +52,8 @@ module SchemaToYaml
 
         if col_name == 'parent_id'
           schema << " - tree_model: [#{col_name.gsub('_id','')}]\n"
+        elsif col_name =~ /_file_size$/
+          schema << " - attachment_field: [#{col_name.gsub(/_file_size$/,'')}]\n"
         else
           belong_tos << col_name.gsub('_id',', ') if col_name.include?('_id')
         end
@@ -49,14 +61,18 @@ module SchemaToYaml
       
       if polymorphics.dups.size > 0
         schema << " - polymorphic: [#{polymorphics.dups.first.gsub('PMCHECK','')}]\n"
+        @polymorphic = polymorphics.dups.first.gsub('PMCHECK','')
       end
       
       @array_of_has_manies.each do |hm|
         sanity_check = hm.gsub(/^#{table.singularize}_/,'')
-        has_manies << hm.gsub(/^#{table.singularize}_/,'') + ', ' if hm =~ /^#{table.singularize}_/ && table_arr.include?(sanity_check)
+        if hm =~ /^#{table.singularize}_/ && table_arr.include?(sanity_check)
+          has_manies << hm.gsub(/^#{table.singularize}_/,'') + ', '
+        end
       end
       
       if belong_tos.size > 0
+        belong_tos = belong_tos.delete_if {|x| x == "#{@polymorphic}, " }
         last_in_array_fix = belong_tos.last
         last_in_array_fix = last_in_array_fix.gsub(', ','')
         belong_tos.pop

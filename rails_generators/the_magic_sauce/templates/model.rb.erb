@@ -6,6 +6,21 @@ class <%= class_name %> < ActiveRecord::Base
   has_one :<%= model %>
 <% end -%>
 <% for model in has_manies -%>
-  has_many :<%= model %>
+  has_many :<%= model %>, :dependent => :destroy
+<% end -%>
+<% for model in polymorphic -%>
+  belongs_to :<%= model %>, :polymorphic => true
+<% end -%>
+<% if has_many_through.size > 0 -%>
+  has_many :<%= has_many_through[0] %>
+  has_many :<%= has_many_through[1] %>, :through => :<%= has_many_through[0] %>
+<% end %>
+<% if tree_model.size > 0 -%>
+  acts_as_category
+<% end -%>
+<% if attachment_field.size > 0 -%>
+  has_attached_file :<%= attachment_field[0] %>,
+                    :styles => { :medium => "600x480>",
+                                 :thumb  => "100x100#" }
 <% end -%>
 end

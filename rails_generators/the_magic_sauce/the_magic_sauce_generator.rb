@@ -73,7 +73,11 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
 
   attr_reader   :belongs_tos, 
                 :has_manies,
-                :has_ones
+                :has_ones,
+                :attachment_field,
+                :has_many_through,
+                :polymorphic,
+                :tree_model
     
   attr_reader   :controller_name,
                 :controller_class_path,
@@ -131,6 +135,10 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
     @belongs_tos = []
     @has_ones = []
     @has_manies = []
+    @attachment_field = []
+    @has_many_through = []
+    @polymorphic = []
+    @tree_model = []
 
     @args.each do |arg|
       if arg =~ /^has_one:/
@@ -139,10 +147,18 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
         @has_manies = arg.split(":")[1].split(",")
       elsif arg =~ /^belongs_to:/
         @belongs_tos = arg.split(":")[1].split(',')
+      elsif arg =~ /^attachment_field:/
+        @attachment_field = arg.split(":")[1].split(',')
+      elsif arg =~ /^has_many_through:/
+        @has_many_through = arg.split(":")[1].split(',')
+      elsif arg =~ /^polymorphic:/
+        @polymorphic = arg.split(":")[1].split(',')
+      elsif arg =~ /^tree_model:/
+        @tree_model = arg.split(":")[1].split(',')
       end
     end
 
-    @args.delete_if { |elt| elt =~ /^(has_one|has_many|belongs_to):/ }
+    @args.delete_if { |elt| elt =~ /^(has_one|has_many|belongs_to|attachment_field|has_many_through|polymorphic|tree_model):/ }
   end
   
   def add_options!(opt)
