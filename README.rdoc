@@ -2,7 +2,9 @@
 
 A simple rails plugin that adds a new rake task [rake db:schema:to_yaml].
 It will analyze your database and create a model.yml file for use in ruboss scaffolding
-via the [./script/generate my_ruboss_scaffold] command.
+via the [./script/generate my_ruboss_scaffold] command.  This is also very useful for
+adding in additional functionality to the model.yml file.  Please see below for the
+juicy details.
 
 == Installing: 
 
@@ -54,8 +56,20 @@ http://github.com/pjhyett/auto_migrations/tree/master
     has_one:  [suitcase]
     polymorphic: [commentable]
     tree_model: [parent]
-    layout: [my_super_layout]
- 
+    layout: [my_super_layout] # => You will have to manually add/modify this to model.yml
+    
+== Layouts:
+
+As you can see from the sections above, you now have the ability to enable custom layouts via the 
+schema_to_yaml.yml file.  You can also choose where you would like to store your layouts, and what
+layout file you would like the default to be.  The layout files use the Rails generator engines, so
+they will all be .erb files.  I will provide a few default layouts so you can see how it's done, and 
+to give a little more customization to generation with ruboss 'out of the box'.
+
+Not only can you set a custom layout default, but you can over-ride the layout file on a per model
+basis in the model.yml file.  Just add the " - layout: [layout_name]" under the respective model.  By
+default it will use the path from the schema_to_yaml.yml config file to locate the correct layout.
+
 == Schema.rb example:
 
     ActiveRecord::Schema.define do
