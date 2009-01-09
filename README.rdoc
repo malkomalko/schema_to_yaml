@@ -4,8 +4,6 @@ A simple rails plugin that adds a new rake task [rake db:schema:to_yaml].
 It will analyze your database and create a model.yml file for use in ruboss scaffolding
 via the [./script/generate my_ruboss_scaffold] command.
 
-More documentation will be coming shortly.
-
 == Installing: 
 
     ./script/plugin install git://github.com/malkomalko/schema_to_yaml.git
@@ -19,10 +17,12 @@ More documentation will be coming shortly.
 You will notice that there is a schema_to_yaml.yml file located in the config dir:
 
     defaults: &defaults
-    # => paperclip/attachment_fu (attachment_fu not yet implemented)
-      attachment_plugin:  'paperclip'
-    # => default/resource_controller
-      controller_pattern: 'resource_controller'
+      attachment_plugin:  'paperclip'              # => paperclip/attachment_fu
+      controller_pattern: 'default'                # => default/resource_controller
+      layouts:
+        enabled: 'false'                           # => true|false
+        dir: 'config/themes'                       # => whatever/you/want
+        default:  '50_50'                          # => would look for 50_50.erb
 
     development:
       <<: *defaults
@@ -34,7 +34,7 @@ You will notice that there is a schema_to_yaml.yml file located in the config di
       <<: *defaults
 
 These settings will be updating over time, but will help in determining what the scaffold
-will generate.  A templating system is coming shortly.
+will generate.  A templating system is now up and running!
 
 == Example Usage:
 	

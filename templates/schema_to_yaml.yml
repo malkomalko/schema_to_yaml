@@ -1,8 +1,10 @@
 defaults: &defaults
-# => paperclip/attachment_fu (attachment_fu not yet implemented)
-  attachment_plugin:  'paperclip'
-# => default/resource_controller
-  controller_pattern: 'resource_controller'
+  attachment_plugin:  'paperclip'              # => paperclip/attachment_fu
+  controller_pattern: 'default'                # => default/resource_controller
+  layouts:
+    enabled: 'false'                           # => true|false
+    dir: 'config/themes'                       # => whatever/you/want
+    default:  '50_50'                          # => would look for 50_50.erb
     
 development:
   <<: *defaults

@@ -83,7 +83,8 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
                 :attachment_field,
                 :has_many_through,
                 :polymorphic,
-                :tree_model
+                :tree_model,
+                :layout
     
   attr_reader   :controller_name,
                 :controller_class_path,
@@ -121,10 +122,22 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
       m.template 'model.as.erb',
         File.join("app", "flex", base_folder, "models", "#{@class_name}.as"), 
         :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
-
-      m.template 'component.mxml.erb',
-        File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
-        :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+        
+      if Settings.layouts.enabled == 'true'
+        if @layout.size > 0
+          m.template "../../../../../../#{Settings.layouts.dir}/#{@layout}.erb",
+            File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
+            :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+        else
+          m.template "../../../../../../#{Settings.layouts.dir}/#{Settings.layouts.default}.erb",
+            File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
+            :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+        end
+      else
+        m.template 'component.mxml.erb',
+          File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
+          :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+      end
         
       m.template "controllers/#{Settings.controller_pattern}.rb.erb", File.join("app/controllers", controller_class_path, 
         "#{controller_file_name}_controller.rb") unless options[:flex_only]
@@ -144,6 +157,7 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
     @has_many_through = []
     @polymorphic = []
     @tree_model = []
+    @layout = []
 
     @args.each do |arg|
       if arg =~ /^has_one:/
@@ -160,10 +174,12 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
         @polymorphic = arg.split(":")[1].split(',')
       elsif arg =~ /^tree_model:/
         @tree_model = arg.split(":")[1].split(',')
+      elsif arg =~ /^layout:/
+        @layout = arg.split(":")[1].split(',')
       end
     end
 
-    @args.delete_if { |elt| elt =~ /^(has_one|has_many|belongs_to|attachment_field|has_many_through|polymorphic|tree_model):/ }
+    @args.delete_if { |elt| elt =~ /^(has_one|has_many|belongs_to|attachment_field|has_many_through|polymorphic|tree_model|layout):/ }
   end
   
   def add_options!(opt)
