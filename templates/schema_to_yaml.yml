@@ -1,6 +1,8 @@
 defaults: &defaults
-  attachment_plugin:  'paperclip' # => paperclip/attachment_fu
-  controller_pattern: 'default'   # => default/resource_controller
+# => paperclip/attachment_fu (attachment_fu not yet implemented)
+  attachment_plugin:  'paperclip'
+# => default/resource_controller
+  controller_pattern: 'resource_controller'
     
 development:
   <<: *defaults

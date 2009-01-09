@@ -19,8 +19,10 @@ More documentation will be coming shortly.
 You will notice that there is a schema_to_yaml.yml file located in the config dir:
 
     defaults: &defaults
-      attachment_plugin:  'paperclip' # => paperclip/attachment_fu
-      controller_pattern: 'default'   # => default/resource_controller
+    # => paperclip/attachment_fu (attachment_fu not yet implemented)
+      attachment_plugin:  'paperclip'
+    # => default/resource_controller
+      controller_pattern: 'resource_controller'
 
     development:
       <<: *defaults
@@ -34,7 +36,7 @@ You will notice that there is a schema_to_yaml.yml file located in the config di
 These settings will be updating over time, but will help in determining what the scaffold
 will generate.  A templating system is coming shortly.
 
-== Example Usage
+== Example Usage:
 	
 Make sure you already have a schema, or create some migrations and migrate, or create a
 schema.rb file using PJ Hyett's auto_migrations plugin:
@@ -42,5 +44,30 @@ http://github.com/pjhyett/auto_migrations/tree/master
 
 * rake db:schema:to_yaml
 * ./script/generate my_ruboss_scaffold
+
+== Special YAML Columns:
+
+*attachment_field
+*belongs_to
+*has_many
+*has_many_through
+*has_one
+*polymorphic
+*tree_model
+ 
+Some quick examples:
+
+    - has_many_through: [permissions, users]
+    - attachment_field: [avatar]
+    - tree_model: [parent]
+    - polymorphic: [commentable]
+    
+== Schema.rb example:
+
+* Coming Soon
+
+== Resulting Model.yml example:
+
+* Coming Soon
 
 Copyright (c) 2009 Robert Malko, released under the MIT license

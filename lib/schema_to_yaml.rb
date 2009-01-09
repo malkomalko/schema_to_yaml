@@ -10,15 +10,6 @@ end
 module SchemaToYaml
   Settings = SchemaToYaml::Settings::Core
   
-  # special columns:
-  #   - attachment_field, belongs_to, has_many, has_many_through,
-  #   - has_one, polymorphic, tree_model
-  # examples:
-  #   - has_many_through: [permissions, users]
-  #   - attachment_field: [avatar]
-  #   - tree_model: [parent]
-  #   - polymorphic: [commentable]
-
   def self.schema_to_yaml
     table_arr = ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations).map
     disregarded_columns = %w(id created_at updated_at)

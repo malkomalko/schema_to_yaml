@@ -68,6 +68,7 @@ module Rails
 end
 
 class TheMagicSauceGenerator < Rails::Generator::NamedBase
+  Settings = SchemaToYaml::Settings
   include Ruboss4Ruby::Configuration
   
   attr_reader   :project_name, 
@@ -125,13 +126,12 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
         File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
         :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
         
-      m.template 'controller.rb.erb', File.join("app/controllers", controller_class_path, 
-        "#{controller_file_name}_controller.rb"), :collision => :force unless options[:flex_only]
+      m.template "controllers/#{Settings.controller_pattern}.rb.erb", File.join("app/controllers", controller_class_path, 
+        "#{controller_file_name}_controller.rb") unless options[:flex_only]
       
-      m.template 'model.rb.erb', File.join("app", "models", "#{file_name}.rb"), 
-        :collision => :force unless options[:flex_only]
+      m.template 'model.rb.erb', File.join("app", "models", "#{file_name}.rb") unless options[:flex_only]
 
-      m.dependency 'ruboss_controller', [name] + @args, :collision => :force
+      m.dependency 'ruboss_controller', [name] + @args
     end
   end
   
