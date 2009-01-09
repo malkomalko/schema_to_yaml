@@ -59,11 +59,16 @@ module Rails
         end
       end
     end
+    module Commands
+      class Create
+        Settings = SchemaToYaml::Settings
+      end
+    end
   end
 end
 
 class TheMagicSauceGenerator < Rails::Generator::NamedBase
-  include Ruboss4Ruby::Configuration 
+  include Ruboss4Ruby::Configuration
   
   attr_reader   :project_name, 
                 :flex_project_name, 

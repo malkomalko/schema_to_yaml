@@ -1,30 +1,28 @@
-module Enumerable
-  def dups
-    inject({}) {|h,v| h[v]=h[v].to_i+1; h}.reject{|k,v| v==1}.keys
-  end
+require "yaml"
+require "erb"
+require File.dirname(__FILE__) + "/schema_to_yaml/settings/config"
+require File.dirname(__FILE__) + "/schema_to_yaml/settings/core"
+
+Dir[File.dirname(__FILE__) + "/schema_to_yaml/extensions/*.rb"].each do |f|
+  require f
 end
 
 module SchemaToYaml
+  Settings = SchemaToYaml::Settings::Core
   
-  ##################################################################
-  # Special columns:
+  # special columns:
   #   - attachment_field, belongs_to, has_many, has_many_through,
   #   - has_one, polymorphic, tree_model
-  # Examples:
-  #   - has_many_through: [living_situations, buildings]
+  # examples:
+  #   - has_many_through: [permissions, users]
   #   - attachment_field: [avatar]
   #   - tree_model: [parent]
-  #   - polymorphic: [favoriteable]
-  ##################################################################
+  #   - polymorphic: [commentable]
 
   def self.schema_to_yaml
     table_arr = ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations).map
-    schema = []
-    
-    ####################################################################################
-    # setup array for columns you don't want returned into the yaml
-    ####################################################################################
     disregarded_columns = %w(id created_at updated_at)
+    schema = []
     @array_of_has_manies = []
     
     table_arr.each do |table|
@@ -39,15 +37,16 @@ module SchemaToYaml
       belong_tos = []
       has_manies = []
       polymorphics = []
+      
       schema << "#{table.singularize}:\n"
       column_arr = ActiveRecord::Base.connection.columns(table)
       
       column_arr.each do |col|
-        columns_check = []
         col_name = col.name.to_s
+        columns_check = []
         disregarded_columns.each {|dc| columns_check << col_name.include?(dc) }
-
         polymorphics << col_name.gsub('_id','PMCHECK').gsub('_type','PMCHECK')
+        
         schema << " - #{col_name}: #{col.type}\n" unless columns_check.include?(true)
 
         if col_name == 'parent_id'

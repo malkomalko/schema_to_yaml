@@ -1,0 +1,46 @@
+= SchemaToYaml
+
+A simple rails plugin that adds a new rake task [rake db:schema:to_yaml].
+It will analyze your database and create a model.yml file for use in ruboss scaffolding
+via the [./script/generate my_ruboss_scaffold] command.
+
+More documentation will be coming shortly.
+
+== Installing: 
+
+    ./script/plugin install git://github.com/malkomalko/schema_to_yaml.git
+    
+* This requires the ruboss4ruby gem:
+
+    http://github.com/dima/ruboss4ruby/tree/master
+
+== Post Install:
+
+You will notice that there is a schema_to_yaml.yml file located in the config dir:
+
+    defaults: &defaults
+      attachment_plugin:  'paperclip' # => paperclip/attachment_fu
+      controller_pattern: 'default'   # => default/resource_controller
+
+    development:
+      <<: *defaults
+
+    test:
+      <<: *defaults
+
+    production:
+      <<: *defaults
+
+These settings will be updating over time, but will help in determining what the scaffold
+will generate.  A templating system is coming shortly.
+
+== Example Usage
+	
+Make sure you already have a schema, or create some migrations and migrate, or create a
+schema.rb file using PJ Hyett's auto_migrations plugin:
+http://github.com/pjhyett/auto_migrations/tree/master
+
+* rake db:schema:to_yaml
+* ./script/generate my_ruboss_scaffold
+
+Copyright (c) 2009 Robert Malko, released under the MIT license

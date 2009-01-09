@@ -8,9 +8,20 @@
 <% for model in belongs_tos -%>
     import <%= base_package %>.models.<%= model.camelcase %>;
 <% end -%>
+<% if attachment_field.size > 0 -%>
+    import org.ruboss.utils.RubossFileReference;
+<% end -%>
 
     [Bindable]
     private var _<%= class_name.dcfirst %>:<%= class_name %> = new <%= class_name %>();
+    
+<% if attachment_field.size > 0 -%>
+    [Bindable]
+    private var fileName:String = "None selected";
+    
+    private var file:RubossFileReference;
+    
+<% end -%>
 
     private function new<%= class_name %>():void {
       _<%= class_name.dcfirst %> = new <%= class_name %>();
@@ -46,10 +57,16 @@
 <% for model in belongs_tos -%>
       <%= class_name.dcfirst %>.<%= model.camelcase(:lower) %> = <%= model.camelcase %>(<%= model.camelcase(:lower) %>ComboBox.selectedItem);
 <% end -%>
+
+<% if attachment_field.size > 0 -%>
+      <%= class_name.dcfirst %>.attachment = file;
+<% end -%>
+
       <%= class_name.dcfirst %>.create({onSuccess: on<%= class_name %>Create});
     }
 
     private function update<%= class_name %>():void {
+      <%= attributes.class %>
 <% for attribute in attributes -%>
 <% if attribute.type == :boolean -%>
       _<%= class_name.dcfirst %>.<%= attribute.flex_name %> = <%= attribute.flex_name %>CheckBox.selected;
@@ -69,6 +86,11 @@
 <% for model in belongs_tos -%>
       _<%= class_name.dcfirst %>.<%= model.camelcase(:lower) %> = <%= model.camelcase %>(<%= model.camelcase(:lower) %>ComboBox.selectedItem);
 <% end -%>
+
+<% if attachment_field.size > 0 -%>
+      _<%= class_name.dcfirst %>.attachment = file;
+<% end -%>
+
       _<%= class_name.dcfirst %>.update({onSuccess: on<%= class_name %>Update});
     }
 
@@ -96,6 +118,34 @@
     private function canDelete<%= class_name %>(<%= class_name.dcfirst %>:<%= class_name %>):Boolean {
       return <%= class_name.dcfirst %> != null && !RubossUtils.isEmpty(<%= class_name.dcfirst %>.id);
     }
+    
+    <% if attachment_field.size > 0 -%>
+      //for file uploads
+      private function chooseFile():void {
+        file = new RubossFileReference("<%= attachment_field[0].camelcase(:lower) %>");
+        file.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+        file.addEventListener(Event.SELECT, selectFile, false, 0, true);
+        file.addEventListener(Event.CANCEL, cancelBrowse, false, 0, true);
+        file.browse();
+      }
+      
+      private function selectFile(event:Event):void { 
+        fileSelected(event)
+      }
+      
+      private function cancelBrowse(event:Event):void {
+        file = null;
+      }
+      
+      private function fileSelected(event:Event):void {
+        fileName = RubossFileReference(event.target).name;
+      }
+      
+      private function ioErrorHandler(event:Event):void {
+        fileChooser.errorString = "Failed to selected a file. Please try again.";
+      }
+    <% end -%>
+    
   ]]></mx:Script>
   <mx:Panel id="<%= class_name.dcfirst.pluralize %>Panel"
     title="<%= class_name.pluralize %>" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid" 
@@ -127,6 +177,12 @@
 <% else -%>
         <mx:TextInput id="<%= attribute.flex_name %>TextInput" width="100%" text="{_<%= class_name.dcfirst %>.<%= attribute.flex_name %>}"/>
 <% end -%>
+      </mx:FormItem>
+<% end -%>
+<% if attachment_field.size > 0 -%>
+      <mx:FormItem label="<%= attachment_field[0].camelcase %>:" width="100%" id="fileChooser">
+     	  <mx:Button label="Browse…" id="fileBrowseButton" click="chooseFile()" />
+     	  <mx:Label text="{fileName}" maxWidth="190" />
       </mx:FormItem>
 <% end -%>
 <% for model in belongs_tos -%>

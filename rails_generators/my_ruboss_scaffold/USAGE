@@ -1,0 +1,16 @@
+Based off ruboss_yaml_scaffold generator from *ruboss4ruby gem
+*http://github.com/dima/ruboss4ruby/tree/master
+
+Description:
+    Scaffolds an entire application based on db/model.yml file.  You can generate
+    the model.yml file using [rake db:schema:to_yaml] if you have an existing
+    schema.  I suggest using the *auto_migrations plugin from PJ Hyett.
+    
+    *http://github.com/pjhyett/auto_migrations/tree/master
+    
+    It will basically read in each model from the model.yml and call
+    the_magic_sauce generator on each of the models.  This has been changed
+    over the ruboss4ruby version.  Please see README.doc for examples.
+
+Examples:
+    `./script/generate my_ruboss_scaffold`
