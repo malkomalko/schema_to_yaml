@@ -100,7 +100,32 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
         t.string   "uuid",  :limit => 36
       end
       add_index 'announcements', 'account_id'
+      
+      create_table "attachments", :force => true do |t|
+        t.integer  "account_id"
+        t.integer  "folder_id"
+        t.text     "notes"
+        t.string   "file_file_name"
+        t.string   "file_content_type"
+        t.integer  "file_file_size"
+        t.datetime "created_at"
+        t.datetime "updated_at"
+        t.string   "uuid",  :limit => 36
+      end
+      add_index 'attachments', 'account_id'
+      add_index 'attachments', 'folder_id'
 
+      create_table "favorites", :force => true do |t|
+        t.integer  "user_id"
+        t.integer  "favoriteable_id"
+        t.string   "favoriteable_type"
+        t.string   "uuid",  :limit => 36
+        t.datetime "created_at"
+        t.datetime "updated_at"
+      end
+      add_index :favorites, :user_id
+      add_index :favorites, [:favoriteable_type, :favoriteable_id]
+      
       create_table "folders", :force => true do |t|
         t.integer  "parent_id"
         t.integer  "position"
@@ -115,31 +140,6 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
       end
       add_index 'folders', 'parent_id'
       add_index 'folders', 'account_id'
-
-      create_table "favorites", :force => true do |t|
-        t.integer  "user_id"
-        t.integer  "favoriteable_id"
-        t.string   "favoriteable_type"
-        t.string   "uuid",  :limit => 36
-        t.datetime "created_at"
-        t.datetime "updated_at"
-      end
-      add_index :favorites, :user_id
-      add_index :favorites, [:favoriteable_type, :favoriteable_id]
-
-      create_table "files", :force => true do |t|
-        t.integer  "account_id"
-        t.integer  "folder_id"
-        t.text     "notes"
-        t.string   "file_file_name"
-        t.string   "file_content_type"
-        t.integer  "file_file_size"
-        t.datetime "created_at"
-        t.datetime "updated_at"
-        t.string   "uuid",  :limit => 36
-      end
-      add_index 'files', 'account_id'
-      add_index 'files', 'folder_id'
 
       create_table "permissions", :force => true do |t|
         t.integer  "user_id"
@@ -184,6 +184,14 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
      - logo_file_size: integer
      - attachment_field: [logo]
      - has_many: [announcements, files, folders, users]
+     
+    attachment:
+     - notes: text
+     - file_file_name: string
+     - file_content_type: string
+     - file_file_size: integer
+     - attachment_field: [file]
+     - belongs_to: [account, folder]
 
     announcement:
      - subject: string
@@ -198,14 +206,6 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
      - polymorphic: [favoriteable]
      - belongs_to: [user]
 
-    file:
-     - notes: text
-     - file_file_name: string
-     - file_content_type: string
-     - file_file_size: integer
-     - attachment_field: [file]
-     - belongs_to: [account, folder]
-
     folder:
      - tree_model: [parent]
      - position: integer
@@ -214,7 +214,7 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
      - descendants_count: integer
      - name: string
      - belongs_to: [account]
-     - has_many: [files]
+     - has_many: [attachments]
 
     permission:
      - belongs_to: [user, role]

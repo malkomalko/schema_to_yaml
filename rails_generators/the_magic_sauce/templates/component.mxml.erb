@@ -119,32 +119,31 @@
       return <%= class_name.dcfirst %> != null && !RubossUtils.isEmpty(<%= class_name.dcfirst %>.id);
     }
     
-    <% if attachment_field.size > 0 -%>
-      //for file uploads
-      private function chooseFile():void {
-        file = new RubossFileReference("<%= attachment_field[0].camelcase(:lower) %>");
-        file.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
-        file.addEventListener(Event.SELECT, selectFile, false, 0, true);
-        file.addEventListener(Event.CANCEL, cancelBrowse, false, 0, true);
-        file.browse();
-      }
-      
-      private function selectFile(event:Event):void { 
-        fileSelected(event)
-      }
-      
-      private function cancelBrowse(event:Event):void {
-        file = null;
-      }
-      
-      private function fileSelected(event:Event):void {
-        fileName = RubossFileReference(event.target).name;
-      }
-      
-      private function ioErrorHandler(event:Event):void {
-        fileChooser.errorString = "Failed to selected a file. Please try again.";
-      }
-    <% end -%>
+<% if attachment_field.size > 0 -%>
+    private function chooseFile():void {
+      file = new RubossFileReference("<%= attachment_field[0].camelcase(:lower) %>");
+      file.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+      file.addEventListener(Event.SELECT, selectFile, false, 0, true);
+      file.addEventListener(Event.CANCEL, cancelBrowse, false, 0, true);
+      file.browse();
+    }
+    
+    private function selectFile(event:Event):void { 
+      fileSelected(event)
+    }
+    
+    private function cancelBrowse(event:Event):void {
+      file = null;
+    }
+    
+    private function fileSelected(event:Event):void {
+      fileName = RubossFileReference(event.target).name;
+    }
+    
+    private function ioErrorHandler(event:Event):void {
+      fileChooser.errorString = "Failed to selected a file. Please try again.";
+    }
+<% end -%>
     
   ]]></mx:Script>
   <mx:Panel id="<%= class_name.dcfirst.pluralize %>Panel"
