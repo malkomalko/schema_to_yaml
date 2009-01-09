@@ -36,7 +36,7 @@ You will notice that there is a schema_to_yaml.yml file located in the config di
 These settings will be updating over time, but will help in determining what the scaffold
 will generate.  A templating system is now up and running!
 
-== Example Usage:
+== Quickstart:
 	
 Make sure you already have a schema, or create some migrations and migrate, or create a
 schema.rb file using PJ Hyett's auto_migrations plugin:
@@ -47,27 +47,178 @@ http://github.com/pjhyett/auto_migrations/tree/master
 
 == Special YAML Columns:
 
-*attachment_field
-*belongs_to
-*has_many
-*has_many_through
-*has_one
-*polymorphic
-*tree_model
+    attachment_field: [avatar]
+    belongs_to: [account]
+    has_many: [announcements, files, folders, users]
+    has_many_through: [permissions, roles]  # => You will have to manually add/modify this to model.yml
+    has_one:  [suitcase]
+    polymorphic: [commentable]
+    tree_model: [parent]
+    layout: [my_super_layout]
  
-Some quick examples:
-
-    - has_many_through: [permissions, users]
-    - attachment_field: [avatar]
-    - tree_model: [parent]
-    - polymorphic: [commentable]
-    
 == Schema.rb example:
 
-* Coming Soon
+    ActiveRecord::Schema.define do
+
+      create_table "accounts", :force => true do |t|
+        t.string   "name"
+        t.text     "description"
+        t.string   "color1"
+        t.string   "color2"
+        t.string   "color3"
+        t.string   "logo_file_name"
+        t.string   "logo_content_type"
+        t.integer  "logo_file_size"
+        t.datetime "created_at"
+        t.datetime "updated_at"
+        t.string   "uuid",  :limit => 36
+      end
+
+      create_table "announcements", :force => true do |t|
+        t.integer  "account_id"
+        t.string   "subject"
+        t.text     "body"
+        t.date     "starts_at"
+        t.date     "ends_at"
+        t.boolean  "show_to_mom"
+        t.datetime "created_at"
+        t.datetime "updated_at"
+        t.string   "uuid",  :limit => 36
+      end
+      add_index 'announcements', 'account_id'
+
+      create_table "folders", :force => true do |t|
+        t.integer  "parent_id"
+        t.integer  "position"
+        t.integer  "children_count"
+        t.integer  "ancestors_count"
+        t.integer  "descendants_count"
+        t.string   "name"
+        t.integer  "account_id"
+        t.string   "uuid",  :limit => 36
+        t.datetime "created_at"
+        t.datetime "updated_at"
+      end
+      add_index 'folders', 'parent_id'
+      add_index 'folders', 'account_id'
+
+      create_table "favorites", :force => true do |t|
+        t.integer  "user_id"
+        t.integer  "favoriteable_id"
+        t.string   "favoriteable_type"
+        t.string   "uuid",  :limit => 36
+        t.datetime "created_at"
+        t.datetime "updated_at"
+      end
+      add_index :favorites, :user_id
+      add_index :favorites, [:favoriteable_type, :favoriteable_id]
+
+      create_table "files", :force => true do |t|
+        t.integer  "account_id"
+        t.integer  "folder_id"
+        t.text     "notes"
+        t.string   "file_file_name"
+        t.string   "file_content_type"
+        t.integer  "file_file_size"
+        t.datetime "created_at"
+        t.datetime "updated_at"
+        t.string   "uuid",  :limit => 36
+      end
+      add_index 'files', 'account_id'
+      add_index 'files', 'folder_id'
+
+      create_table "permissions", :force => true do |t|
+        t.integer  "user_id"
+        t.integer  "role_id"
+        t.datetime "created_at"
+        t.datetime "updated_at"
+      end
+      add_index "permissions", ["user_id"], :name => "index_permissions_on_user_id"
+      add_index "permissions", ["role_id"], :name => "index_permissions_on_role_id"
+
+      create_table "roles", :force => true do |t|
+        t.string  "name"
+      end
+
+      create_table "users", :force => true do |t|
+        t.integer  "account_id"
+        t.string   "email"
+        t.string   "first_name"
+        t.float    "happiness"
+        t.string   "last_name"
+        t.string   "avatar_file_name"
+        t.string   "avatar_content_type"
+        t.integer  "avatar_file_size"
+        t.string   "uuid", :limit => 36
+        t.datetime "created_at"
+        t.datetime "updated_at"
+      end
+      add_index 'users', 'account_id'
+
+    end
 
 == Resulting Model.yml example:
 
-* Coming Soon
+    account:
+     - name: string
+     - description: text
+     - color1: string
+     - color2: string
+     - color3: string
+     - logo_file_name: string
+     - logo_content_type: string
+     - logo_file_size: integer
+     - attachment_field: [logo]
+     - has_many: [announcements, files, folders, users]
+
+    announcement:
+     - subject: string
+     - body: text
+     - starts_at: date
+     - ends_at: date
+     - show_to_mom: boolean
+     - belongs_to: [account]
+
+    favorite:
+     - favoriteable_type: string
+     - polymorphic: [favoriteable]
+     - belongs_to: [user]
+
+    file:
+     - notes: text
+     - file_file_name: string
+     - file_content_type: string
+     - file_file_size: integer
+     - attachment_field: [file]
+     - belongs_to: [account, folder]
+
+    folder:
+     - tree_model: [parent]
+     - position: integer
+     - children_count: integer
+     - ancestors_count: integer
+     - descendants_count: integer
+     - name: string
+     - belongs_to: [account]
+     - has_many: [files]
+
+    permission:
+     - belongs_to: [user, role]
+
+    role:
+     - name: string
+     - has_many: [permissions]
+
+    user:
+     - email: string
+     - first_name: string
+     - happiness: float
+     - last_name: string
+     - avatar_file_name: string
+     - avatar_content_type: string
+     - avatar_file_size: integer
+     - attachment_field: [avatar]
+     - belongs_to: [account]
+     - has_many: [favorites, permissions]
 
 Copyright (c) 2009 Robert Malko, released under the MIT license
