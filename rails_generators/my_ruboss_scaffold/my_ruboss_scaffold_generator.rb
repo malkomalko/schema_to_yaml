@@ -32,8 +32,8 @@ class MyRubossScaffoldGenerator < Rails::Generator::Base
         puts 'done ...'
         sleep 1
       end
-      Rails::Generator::Scripts::Generate.new.run(["ruboss_config"], :main_only => true, 
-        :skip_framework => ARGV.include?('skipframework'))
+      # Rails::Generator::Scripts::Generate.new.run(["ruboss_config"], :main_only => true, 
+      #         :skip_framework => ARGV.include?('skipframework'))
     end
   end
 
