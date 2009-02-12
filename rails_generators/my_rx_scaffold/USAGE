@@ -1,5 +1,5 @@
-Based off ruboss_yaml_scaffold generator from *ruboss4ruby gem
-*http://github.com/dima/ruboss4ruby/tree/master
+Based off rx_yaml_scaffold generator from *restfulx gem
+*http://github.com/dima/restfulx/tree/master
 
 Description:
     Scaffolds an entire application based on db/model.yml file.  You can generate
@@ -10,7 +10,7 @@ Description:
     
     It will basically read in each model from the model.yml and call
     the_magic_sauce generator on each of the models.  This has been changed
-    over the ruboss4ruby version.  Please see README.doc for examples.
+    over the restfulx version.  Please see README.doc for examples.
 
 Examples:
-    `./script/generate my_ruboss_scaffold`
+    `./script/generate my_rx_scaffold`

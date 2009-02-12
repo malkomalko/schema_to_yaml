@@ -1,8 +1,8 @@
 = SchemaToYaml
 
 A simple rails plugin that adds a new rake task [rake db:schema:to_yaml].
-It will analyze your database and create a model.yml file for use in ruboss scaffolding
-via the [./script/generate my_ruboss_scaffold] command.  This is also very useful for
+It will analyze your database and create a model.yml file for use in RestfulX scaffolding
+via the [./script/generate my_rx_scaffold] command.  This is also very useful for
 adding in additional functionality to the model.yml file.  Please see below for the
 juicy details.
 
@@ -10,21 +10,23 @@ juicy details.
 
     ./script/plugin install git://github.com/malkomalko/schema_to_yaml.git
     
-* This requires the ruboss4ruby gem:
+* This requires the restfulx gem:
 
-    http://github.com/dima/ruboss4ruby/tree/master
+    http://github.com/dima/restfulx/tree/master
 
 == Post Install:
 
 You will notice that there is a schema_to_yaml.yml file located in the config dir:
 
     defaults: &defaults
-      attachment_plugin:  'paperclip'              # => paperclip/attachment_fu
+      attachment_plugin:  'paperclip'              # => paperclip
       controller_pattern: 'default'                # => default/resource_controller
       layouts:
-        enabled: 'false'                           # => true|false
-        dir: 'config/themes'                       # => whatever/you/want
-        default:  '50_50'                          # => would look for 50_50.erb
+        enabled:  'true'                           # => true/false
+        default:  'default'                        # => default (more coming soon)
+      ignored:                                     # => ignored tables/fields won't appear in model.yml
+        tables: [table1 table2]
+        fields: [field1 field2]
 
     development:
       <<: *defaults
@@ -36,7 +38,7 @@ You will notice that there is a schema_to_yaml.yml file located in the config di
       <<: *defaults
 
 These settings will be updating over time, but will help in determining what the scaffold
-will generate.  A templating system is now up and running!
+will generate.  More templates coming soon!
 
 == Quickstart:
 	
@@ -45,31 +47,24 @@ schema.rb file using PJ Hyett's auto_migrations plugin:
 http://github.com/pjhyett/auto_migrations/tree/master
 
 * rake db:schema:to_yaml
-* ./script/generate my_ruboss_scaffold
+* ./script/generate my_rx_scaffold
 
 == Special YAML Columns:
 
     attachment_field: [avatar]
+      * argument takes Paperclip field name, with Attachment-Fu option coming soon
     belongs_to: [account]
     has_many: [announcements, files, folders, users]
-    has_many_through: [permissions, roles]  # => You will have to manually add/modify this to model.yml
+    has_many_through: [permissions, roles]
+      * you will have to manually add/modify this to model.yml, you're allowed to have multiple has_many_throughs
     has_one:  [suitcase]
     polymorphic: [commentable]
     tree_model: [parent]
-    layout: [my_super_layout] # => You will have to manually add/modify this to model.yml
+    layout: [default]
+      * you will have to manually add/modify this to model.yml, with only a default layout currently present
+    ignored_fields: [children_count, ancestors_count, descendants_count, position]
+      * specify fields you don't want being generated
     
-== Layouts:
-
-As you can see from the sections above, you now have the ability to enable custom layouts via the 
-schema_to_yaml.yml file.  You can also choose where you would like to store your layouts, and what
-layout file you would like the default to be.  The layout files use the Rails generator engines, so
-they will all be .erb files.  I will provide a few default layouts so you can see how it's done, and 
-to give a little more customization to generation with ruboss 'out of the box'.
-
-Not only can you set a custom layout default, but you can over-ride the layout file on a per model
-basis in the model.yml file.  Just add the " - layout: [layout_name]" under the respective model.  By
-default it will use the path from the schema_to_yaml.yml config file to locate the correct layout.
-
 == Schema.rb example:
 
     ActiveRecord::Schema.define do
@@ -215,6 +210,7 @@ default it will use the path from the schema_to_yaml.yml config file to locate t
      - name: string
      - belongs_to: [account]
      - has_many: [attachments]
+     - ignored_fields: [children_count, ancestors_count, descendants_count, position]
 
     permission:
      - belongs_to: [user, role]

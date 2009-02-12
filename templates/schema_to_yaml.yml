@@ -1,10 +1,12 @@
 defaults: &defaults
-  attachment_plugin:  'paperclip'              # => paperclip/attachment_fu
+  attachment_plugin:  'paperclip'              # => paperclip
   controller_pattern: 'default'                # => default/resource_controller
   layouts:
-    enabled: 'false'                           # => true|false
-    dir: 'config/themes'                       # => whatever/you/want
-    default:  '50_50'                          # => would look for 50_50.erb
+    enabled:  'true'                           # => true/false
+    default:  'default'                        # => default (more coming soon)
+  ignored:                                     # => ignored tables/fields won't appear in model.yml
+    tables: [table1 table2]
+    fields: [field1 field2]
     
 development:
   <<: *defaults

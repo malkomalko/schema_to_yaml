@@ -11,8 +11,10 @@ module SchemaToYaml
   Settings = SchemaToYaml::Settings::Core
   
   def self.schema_to_yaml
-    table_arr = ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations).map
-    disregarded_columns = %w(id created_at updated_at)
+    table_arr = ActiveRecord::Base.connection.tables - 
+      %w(schema_info schema_migrations).map - 
+      Settings.ignored.tables[0].split
+    disregarded_columns = %w(id created_at updated_at) + Settings.ignored.fields[0].split
     schema = []
     @array_of_has_manies = []
     
@@ -45,7 +47,7 @@ module SchemaToYaml
         elsif col_name =~ /_file_size$/
           schema << " - attachment_field: [#{col_name.gsub(/_file_size$/,'')}]\n"
         else
-          belong_tos << col_name.gsub('_id',', ') if col_name.include?('_id')
+          belong_tos << col_name.gsub('_id',', ') if col_name.include?('_id') && !disregarded_columns.include?(col_name)
         end
       end
       

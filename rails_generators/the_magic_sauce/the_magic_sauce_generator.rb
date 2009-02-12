@@ -69,7 +69,7 @@ end
 
 class TheMagicSauceGenerator < Rails::Generator::NamedBase
   Settings = SchemaToYaml::Settings
-  include Ruboss4Ruby::Configuration
+  include RestfulX::Configuration
   
   attr_reader   :project_name, 
                 :flex_project_name, 
@@ -84,7 +84,8 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
                 :has_many_through,
                 :polymorphic,
                 :tree_model,
-                :layout
+                :layout,
+                :ignored_fields
     
   attr_reader   :controller_name,
                 :controller_class_path,
@@ -119,17 +120,24 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
   
   def manifest
     record do |m|
-      m.template 'model.as.erb',
-        File.join("app", "flex", base_folder, "models", "#{@class_name}.as"), 
-        :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+      unless options[:flex_view_only]
+        m.template 'model.as.erb',
+          File.join("app", "flex", base_folder, "models", "#{@class_name}.as"), 
+          :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
+          
+        m.template "controllers/#{Settings.controller_pattern}.rb.erb", File.join("app/controllers", 
+          controller_class_path, "#{controller_file_name}_controller.rb") unless options[:flex_only]
+        
+        m.template 'model.rb.erb', File.join("app", "models", "#{file_name}.rb") unless options[:flex_only]
+      end
         
       if Settings.layouts.enabled == 'true'
         if @layout.size > 0
-          m.template "../../../../../../#{Settings.layouts.dir}/#{@layout}.erb",
+          m.template "layouts/#{@layout}.erb",
             File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
             :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
         else
-          m.template "../../../../../../#{Settings.layouts.dir}/#{Settings.layouts.default}.erb",
+          m.template "layouts/#{Settings.layouts.default}.erb",
             File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
             :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
         end
@@ -138,28 +146,28 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
           File.join("app", "flex", base_folder, "components", "generated", "#{@class_name}Box.mxml"), 
           :assigns => { :resource_controller_name => "#{file_name.pluralize}" }
       end
-        
-      m.template "controllers/#{Settings.controller_pattern}.rb.erb", File.join("app/controllers", controller_class_path, 
-        "#{controller_file_name}_controller.rb") unless options[:flex_only]
       
-      m.template 'model.rb.erb', File.join("app", "models", "#{file_name}.rb") unless options[:flex_only]
-
-      m.dependency 'ruboss_controller', [name] + @args
+      m.dependency 'rx_controller', [name] + @args
     end
   end
   
   protected
   def extract_relationships
+    # arrays
     @belongs_tos = []
     @has_ones = []
     @has_manies = []
     @attachment_field = []
-    @has_many_through = []
     @polymorphic = []
     @tree_model = []
     @layout = []
+    @ignored_fields = []
+    
+    # hashes
+    @has_many_through = {}
 
     @args.each do |arg|
+      # arrays
       if arg =~ /^has_one:/
         @has_ones = arg.split(':')[1].split(',')
       elsif arg =~ /^has_many:/
@@ -168,24 +176,42 @@ class TheMagicSauceGenerator < Rails::Generator::NamedBase
         @belongs_tos = arg.split(":")[1].split(',')
       elsif arg =~ /^attachment_field:/
         @attachment_field = arg.split(":")[1].split(',')
-      elsif arg =~ /^has_many_through:/
-        @has_many_through = arg.split(":")[1].split(',')
       elsif arg =~ /^polymorphic:/
         @polymorphic = arg.split(":")[1].split(',')
       elsif arg =~ /^tree_model:/
         @tree_model = arg.split(":")[1].split(',')
       elsif arg =~ /^layout:/
         @layout = arg.split(":")[1].split(',')
+      elsif arg =~ /^ignored_fields:/
+        @ignored_fields = arg.split(":")[1].split(',')
+      # hashes
+      elsif arg =~ /^has_many_through:/
+        hmt_arr = arg.split(":")[1].split(',')
+        @has_many_through[hmt_arr.first] = hmt_arr.last
       end
     end
-
-    @args.delete_if { |elt| elt =~ /^(has_one|has_many|belongs_to|attachment_field|has_many_through|polymorphic|tree_model|layout):/ }
+    
+    # delete special fields from @args ivar
+    %w(has_one has_many belongs_to attachment_field has_many_through 
+      polymorphic tree_model layout ignored_fields).each do |special_field|
+      @args.delete_if { |f| f =~ /^(#{special_field}):/ }
+    end
+    
+    # delete ignored_fields from @args ivar
+    @ignored_fields.each do |ignored|
+      @args.delete_if { |f| f =~ /^(#{ignored}):/ }
+    end
+    
   end
   
   def add_options!(opt)
     opt.separator ''
     opt.separator 'Options:'
-    opt.on("-f", "--flex-only", "Scaffold Flex code only", 
+    opt.on("-f", "--flex-only", "scaffold flex code only", 
       "Default: false") { |v| options[:flex_only] = v}
+    opt.on("-r", "--rails-only", "scaffold rails code only", 
+      "Default: false") { |v| options[:rails_only] = v}
+    opt.on("-fv", "--flex_view_only", "scaffold flex generated component only", 
+      "Default: false") { |v| options[:flex_view_only] = v}
   end
 end
